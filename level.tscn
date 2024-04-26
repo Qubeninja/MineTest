@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://dmcpwlf3wwjq0"]
+
+[ext_resource type="PackedScene" uid="uid://cdq1hwdk00tee" path="res://chunk.tscn" id="1_6edhl"]
+
+[node name="Level" type="Node3D"]
+
+[node name="Chunk" parent="." instance=ExtResource("1_6edhl")]
