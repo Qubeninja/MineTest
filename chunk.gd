@@ -4,6 +4,8 @@ extends StaticBody3D
 @export var CollisionShape: CollisionShape3D
 @export var MeshInstance: MeshInstance3D
 
+@onready var blockManager = $"../BlockManager"
+
 #How big is the chunk x, y, z
 static var dimensions: Vector3i = Vector3i(16, 64, 16)
 
@@ -40,12 +42,23 @@ func _ready():
 
 #Fill _blocks dict
 func Generate():
-	var block = Block
 	for x in dimensions.x:
 		
 		for y in dimensions.y:
 			
 			for z in dimensions.z:
+				var block: Block 
+				var groundHeight: int = 40
+
+				if y < groundHeight / 2:
+					block = blockManager.stone
+				else: if y < groundHeight:
+					block = blockManager.dirt
+				else: if y == groundHeight:
+					block = blockManager.grass
+				else:
+					block = blockManager.air	
+				
 				_blocks[Vector3i(x,y,z)] = block
 
 #using _blocks generate CollisionShape & MeshInstance
@@ -59,6 +72,7 @@ func Update():
 			for z in dimensions.z:
 				CreateBlockMesh(Vector3i(x,y,z))
 	
+	_surfacetool.set_material(blockManager.chunkMaterial)
 	var mesh: ArrayMesh = _surfacetool.commit()
 
 	MeshInstance.mesh = mesh
@@ -68,48 +82,72 @@ func Update():
 		"Generated {vertices} vertices ({triangles} triangles, {faces} faces)".format(
 			{
 				"vertices": mesh.surface_get_array_len(0),
-				"triangles": mesh.surface_get_array_len(0) / 3,
-				"faces": (mesh.surface_get_array_len(0) / 3) / 2
+				"triangles": mesh.surface_get_array_len(0) / 3.0,
+				"faces": (mesh.surface_get_array_len(0) / 3.0) / 2.0
 			}
 		)
 	)
 
 #Generate a block mesh 
-func CreateBlockMesh(block_postion: Vector3i):
+func CreateBlockMesh(block_position: Vector3i):
+
+		var block = _blocks[Vector3(block_position)]
+
+		if block == blockManager.air: return
 		#Check if block above is transparent
-		if CheckTransparent(block_postion + Vector3i.UP):
+		if CheckTransparent(block_position + Vector3i.UP):
 			#if true create top face mesh
-			CreateFaceMesh(_top, block_postion)
+			CreateFaceMesh(_top, block_position, block.texture)
 
-		if CheckTransparent(block_postion + Vector3i.DOWN):
-			CreateFaceMesh(_bottom, block_postion)
+		if CheckTransparent(block_position + Vector3i.DOWN):
+			CreateFaceMesh(_bottom, block_position, block.texture)
 		
-		if CheckTransparent(block_postion + Vector3i.LEFT):
-			CreateFaceMesh(_left, block_postion)
+		if CheckTransparent(block_position + Vector3i.LEFT):
+			CreateFaceMesh(_left, block_position, block.texture)
 		
-		if CheckTransparent(block_postion + Vector3i.RIGHT):
-			CreateFaceMesh(_right, block_postion)
+		if CheckTransparent(block_position + Vector3i.RIGHT):
+			CreateFaceMesh(_right, block_position, block.texture)
 			
-		if CheckTransparent(block_postion + Vector3i.BACK):
-			CreateFaceMesh(_back, block_postion)
+		if CheckTransparent(block_position + Vector3i.BACK):
+			CreateFaceMesh(_back, block_position, block.texture)
 
-		if CheckTransparent(block_postion + Vector3i.FORWARD):
-			CreateFaceMesh(_front, block_postion)
+		if CheckTransparent(block_position + Vector3i.FORWARD):
+			CreateFaceMesh(_front, block_position, block.texture)
 
 #Generate a face mesh using face array
-func CreateFaceMesh(face: Array[int], block_position: Vector3i):
+func CreateFaceMesh(face: Array[int], block_position: Vector3i, texture: Texture2D):
+
+	var texturePosition = blockManager.GetTextureAtlasPosition(texture)
+	var textureAtlasSize = blockManager.textureAtlasSize
+
+	var uvOffset = texturePosition / textureAtlasSize
+	var uvWidth = 1.0 / textureAtlasSize.x
+	var uvHeight = 1.0 / textureAtlasSize.y
+
+	var uvA = uvOffset + Vector2(0, 0) 
+	var uvB = uvOffset + Vector2(0, uvHeight)
+	var uvC = uvOffset + Vector2(uvWidth, uvHeight)
+	var uvD = uvOffset + Vector2(uvWidth, 0)
+
 	var a = _vertices[face[0]] + block_position
 	var b = _vertices[face[1]] + block_position					#a----------d
 	var c = _vertices[face[2]] + block_position					#|			|
 	var d = _vertices[face[3]] + block_position					#|			|
 																#|			|
-	var triangle1 = [a,b,c]										#b----------c
+	var uvTriangle1 = [uvA, uvB, uvC]							#b----------c
+	var uvTriangle2 = [uvA, uvC, uvD]						
+							
+	var triangle1 = [a,b,c]										
 	var triangle2 = [a,c,d]
 
-	_surfacetool.add_triangle_fan(triangle1)
-	_surfacetool.add_triangle_fan(triangle2)
+	_surfacetool.add_triangle_fan(triangle1, uvTriangle1)
+	_surfacetool.add_triangle_fan(triangle2, uvTriangle2)
 
 
 #Check if adjacent block is transparent 
-func CheckTransparent(block_postion: Vector3i) -> bool:
-	return true
+func CheckTransparent(block_position: Vector3i) -> bool:
+	if (block_position.x < 0 || block_position.x >= dimensions.x): return true
+	if (block_position.y < 0 || block_position.y >= dimensions.y): return true
+	if (block_position.z < 0 || block_position.z >= dimensions.z): return true
+
+	return _blocks[Vector3(block_position)] == blockManager.air
