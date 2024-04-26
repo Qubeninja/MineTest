@@ -64,6 +64,16 @@ func Update():
 	MeshInstance.mesh = mesh
 	CollisionShape.shape = mesh.create_trimesh_shape()
 
+	print(
+		"Generated {vertices} vertices ({triangles} triangles, {faces} faces)".format(
+			{
+				"vertices": mesh.surface_get_array_len(0),
+				"triangles": mesh.surface_get_array_len(0) / 3,
+				"faces": (mesh.surface_get_array_len(0) / 3) / 2
+			}
+		)
+	)
+
 #Generate a block mesh 
 func CreateBlockMesh(block_postion: Vector3i):
 		#Check if block above is transparent
