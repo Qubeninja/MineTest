@@ -4,7 +4,9 @@ extends StaticBody3D
 @export var CollisionShape: CollisionShape3D
 @export var MeshInstance: MeshInstance3D
 
+#@onready var blockManager = $"/root/Level/BlockManager"
 @onready var blockManager = $"../BlockManager"
+
 
 #How big is the chunk x, y, z
 static var dimensions: Vector3i = Vector3i(16, 64, 16)
@@ -37,6 +39,7 @@ var _surfacetool: SurfaceTool = SurfaceTool.new()
 var _blocks: Dictionary
 
 func _ready():
+	
 	Generate()
 	Update()
 
@@ -50,7 +53,7 @@ func Generate():
 				var block: Block 
 				var groundHeight: int = 40
 
-				if y < groundHeight / 2:
+				if y < groundHeight / 2.0:
 					block = blockManager.stone
 				else: if y < groundHeight:
 					block = blockManager.dirt
@@ -90,35 +93,34 @@ func Update():
 
 #Generate a block mesh 
 func CreateBlockMesh(block_position: Vector3i):
+	var block = _blocks[Vector3i(block_position)]
 
-		var block = _blocks[Vector3(block_position)]
+	if block == blockManager.air: return
+	#Check if block above is transparent
+	if CheckTransparent(block_position + Vector3i.UP):
+		#if true create top face mesh
+		CreateFaceMesh(_top, block_position, block.texture)
 
-		if block == blockManager.air: return
-		#Check if block above is transparent
-		if CheckTransparent(block_position + Vector3i.UP):
-			#if true create top face mesh
-			CreateFaceMesh(_top, block_position, block.texture)
-
-		if CheckTransparent(block_position + Vector3i.DOWN):
-			CreateFaceMesh(_bottom, block_position, block.texture)
+	if CheckTransparent(block_position + Vector3i.DOWN):
+		CreateFaceMesh(_bottom, block_position, block.texture)
 		
-		if CheckTransparent(block_position + Vector3i.LEFT):
-			CreateFaceMesh(_left, block_position, block.texture)
+	if CheckTransparent(block_position + Vector3i.LEFT):
+		CreateFaceMesh(_left, block_position, block.texture)
 		
-		if CheckTransparent(block_position + Vector3i.RIGHT):
-			CreateFaceMesh(_right, block_position, block.texture)
+	if CheckTransparent(block_position + Vector3i.RIGHT):
+		CreateFaceMesh(_right, block_position, block.texture)
 			
-		if CheckTransparent(block_position + Vector3i.BACK):
-			CreateFaceMesh(_back, block_position, block.texture)
+	if CheckTransparent(block_position + Vector3i.BACK):
+		CreateFaceMesh(_back, block_position, block.texture)
 
-		if CheckTransparent(block_position + Vector3i.FORWARD):
-			CreateFaceMesh(_front, block_position, block.texture)
+	if CheckTransparent(block_position + Vector3i.FORWARD):
+		CreateFaceMesh(_front, block_position, block.texture)
 
 #Generate a face mesh using face array
 func CreateFaceMesh(face: Array[int], block_position: Vector3i, texture: Texture2D):
 
-	var texturePosition = blockManager.GetTextureAtlasPosition(texture)
-	var textureAtlasSize = blockManager.textureAtlasSize
+	var texturePosition: Vector2 = blockManager.GetTextureAtlasPosition(texture)
+	var textureAtlasSize: Vector2 = blockManager.textureAtlasSize
 
 	var uvOffset = texturePosition / textureAtlasSize
 	var uvWidth = 1.0 / textureAtlasSize.x
@@ -150,4 +152,4 @@ func CheckTransparent(block_position: Vector3i) -> bool:
 	if (block_position.y < 0 || block_position.y >= dimensions.y): return true
 	if (block_position.z < 0 || block_position.z >= dimensions.z): return true
 
-	return _blocks[Vector3(block_position)] == blockManager.air
+	return _blocks[Vector3i(block_position)] == blockManager.air
