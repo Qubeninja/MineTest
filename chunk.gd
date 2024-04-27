@@ -4,7 +4,8 @@ extends StaticBody3D
 @export var CollisionShape: CollisionShape3D
 @export var MeshInstance: MeshInstance3D
 
-#@onready var blockManager = $"/root/Level/BlockManager"
+@export var noise: FastNoiseLite
+
 @onready var blockManager = $"../BlockManager"
 
 
@@ -38,8 +39,11 @@ var _surfacetool: SurfaceTool = SurfaceTool.new()
 #WARN: possible problem point
 var _blocks: Dictionary
 
+var chunkPosition: Vector2i
+
 func _ready():
-	
+	chunkPosition = Vector2i(global_position.x / dimensions.x, global_position.z / dimensions.z)
+
 	Generate()
 	Update()
 
@@ -51,9 +55,13 @@ func Generate():
 			
 			for z in dimensions.z:
 				var block: Block 
-				var groundHeight: int = 40
 
-				if y < groundHeight / 2.0:
+				var globalBlockPosition: Vector2i = (chunkPosition * Vector2i(dimensions.x, dimensions.z)) + Vector2i(x, z)
+				# gte_noise_2d outputs a value in range of (-1 - 1), +1 makes it (0 - 2), /2 makes it (0 - 1), * dim.y makes it a value between 0 and dim.y,
+				# finally cast whole thing as an int
+				var groundHeight: int = int((dimensions.y * ((noise.get_noise_2d(globalBlockPosition.x, globalBlockPosition.y) + 1.0) / 2.0))) 
+
+				if y < groundHeight / 1.2:
 					block = blockManager.stone
 				else: if y < groundHeight:
 					block = blockManager.dirt
@@ -99,10 +107,10 @@ func CreateBlockMesh(block_position: Vector3i):
 	#Check if block above is transparent
 	if CheckTransparent(block_position + Vector3i.UP):
 		#if true create top face mesh
-		CreateFaceMesh(_top, block_position, block.texture)
+		CreateFaceMesh(_top, block_position, block.topTexture if block.topTexture else block.texture)
 
 	if CheckTransparent(block_position + Vector3i.DOWN):
-		CreateFaceMesh(_bottom, block_position, block.texture)
+		CreateFaceMesh(_bottom, block_position, block.bottomTexture if block.bottomTexture else)
 		
 	if CheckTransparent(block_position + Vector3i.LEFT):
 		CreateFaceMesh(_left, block_position, block.texture)
