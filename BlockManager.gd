@@ -77,7 +77,7 @@ func _ready():
 		)
 	)
 
-func GetTextureAtlasPosition(texture: Texture2D) -> Vector2i:
+func get_texture_atlas_position(texture: Texture2D) -> Vector2i:
 	if texture == null:
 		return Vector2.ZERO
 	else:

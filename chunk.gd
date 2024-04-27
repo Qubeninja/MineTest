@@ -44,11 +44,11 @@ var chunkPosition: Vector2i
 func _ready():
 	chunkPosition = Vector2i(global_position.x / dimensions.x, global_position.z / dimensions.z)
 
-	Generate()
-	Update()
+	generate()
+	update()
 
 #Fill _blocks dict
-func Generate():
+func generate():
 	for x in dimensions.x:
 		
 		for y in dimensions.y:
@@ -73,7 +73,7 @@ func Generate():
 				_blocks[Vector3i(x,y,z)] = block
 
 #using _blocks generate CollisionShape & MeshInstance
-func Update():
+func update():
 	_surfacetool.begin(Mesh.PRIMITIVE_TRIANGLES)
 
 	for x in dimensions.x:
@@ -81,7 +81,7 @@ func Update():
 		for y in dimensions.y:
 			
 			for z in dimensions.z:
-				CreateBlockMesh(Vector3i(x,y,z))
+				create_block_mesh(Vector3i(x,y,z))
 	
 	_surfacetool.set_material(blockManager.chunkMaterial)
 	var mesh: ArrayMesh = _surfacetool.commit()
@@ -90,7 +90,7 @@ func Update():
 	CollisionShape.shape = mesh.create_trimesh_shape()
 
 	print(
-		"Generated {vertices} vertices ({triangles} triangles, {faces} faces)".format(
+		"generated {vertices} vertices ({triangles} triangles, {faces} faces)".format(
 			{
 				"vertices": mesh.surface_get_array_len(0),
 				"triangles": mesh.surface_get_array_len(0) / 3.0,
@@ -99,35 +99,35 @@ func Update():
 		)
 	)
 
-#Generate a block mesh 
-func CreateBlockMesh(block_position: Vector3i):
+#generate a block mesh 
+func create_block_mesh(block_position: Vector3i):
 	var block = _blocks[Vector3i(block_position)]
 
 	if block == blockManager.air: return
 	#Check if block above is transparent
-	if CheckTransparent(block_position + Vector3i.UP):
+	if check_transparent(block_position + Vector3i.UP):
 		#if true create top face mesh
-		CreateFaceMesh(_top, block_position, block.topTexture if block.topTexture else block.texture)
+		create_face_mesh(_top, block_position, block.topTexture if block.topTexture else block.texture)
 
-	if CheckTransparent(block_position + Vector3i.DOWN):
-		CreateFaceMesh(_bottom, block_position, block.bottomTexture if block.bottomTexture else block.texture)
+	if check_transparent(block_position + Vector3i.DOWN):
+		create_face_mesh(_bottom, block_position, block.bottomTexture if block.bottomTexture else block.texture)
 		
-	if CheckTransparent(block_position + Vector3i.LEFT):
-		CreateFaceMesh(_left, block_position, block.texture)
+	if check_transparent(block_position + Vector3i.LEFT):
+		create_face_mesh(_left, block_position, block.texture)
 		
-	if CheckTransparent(block_position + Vector3i.RIGHT):
-		CreateFaceMesh(_right, block_position, block.texture)
+	if check_transparent(block_position + Vector3i.RIGHT):
+		create_face_mesh(_right, block_position, block.texture)
 			
-	if CheckTransparent(block_position + Vector3i.BACK):
-		CreateFaceMesh(_back, block_position, block.texture)
+	if check_transparent(block_position + Vector3i.BACK):
+		create_face_mesh(_back, block_position, block.texture)
 
-	if CheckTransparent(block_position + Vector3i.FORWARD):
-		CreateFaceMesh(_front, block_position, block.texture)
+	if check_transparent(block_position + Vector3i.FORWARD):
+		create_face_mesh(_front, block_position, block.texture)
 
-#Generate a face mesh using face array
-func CreateFaceMesh(face: Array[int], block_position: Vector3i, texture: Texture2D):
+#generate a face mesh using face array
+func create_face_mesh(face: Array[int], block_position: Vector3i, texture: Texture2D):
 
-	var texturePosition: Vector2 = blockManager.GetTextureAtlasPosition(texture)
+	var texturePosition: Vector2 = blockManager.get_texture_atlas_position(texture)
 	var textureAtlasSize: Vector2 = blockManager.textureAtlasSize
 
 	var uvOffset = texturePosition / textureAtlasSize
@@ -155,7 +155,7 @@ func CreateFaceMesh(face: Array[int], block_position: Vector3i, texture: Texture
 
 
 #Check if adjacent block is transparent 
-func CheckTransparent(block_position: Vector3i) -> bool:
+func check_transparent(block_position: Vector3i) -> bool:
 	if (block_position.x < 0 || block_position.x >= dimensions.x): return true
 	if (block_position.y < 0 || block_position.y >= dimensions.y): return true
 	if (block_position.z < 0 || block_position.z >= dimensions.z): return true
