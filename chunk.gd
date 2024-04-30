@@ -1,4 +1,5 @@
 @tool
+class_name Chunk
 extends StaticBody3D
 
 @export var CollisionShape: CollisionShape3D
@@ -42,7 +43,7 @@ var _blocks: Dictionary
 var chunkPosition: Vector2i
 
 func _ready():
-	chunkPosition = Vector2i(global_position.x / dimensions.x, global_position.z / dimensions.z)
+	chunkPosition = Vector2i(int(global_position.x / dimensions.x), int(global_position.z / dimensions.z))
 
 	generate()
 	update()
@@ -89,15 +90,15 @@ func update():
 	MeshInstance.mesh = mesh
 	CollisionShape.shape = mesh.create_trimesh_shape()
 
-	print(
-		"generated {vertices} vertices ({triangles} triangles, {faces} faces)".format(
-			{
-				"vertices": mesh.surface_get_array_len(0),
-				"triangles": mesh.surface_get_array_len(0) / 3.0,
-				"faces": (mesh.surface_get_array_len(0) / 3.0) / 2.0
-			}
-		)
-	)
+	# print(
+	# 	"generated {vertices} vertices ({triangles} triangles, {faces} faces)".format(
+	# 		{
+	# 			"vertices": mesh.surface_get_array_len(0),
+	# 			"triangles": mesh.surface_get_array_len(0) / 3.0,
+	# 			"faces": (mesh.surface_get_array_len(0) / 3.0) / 2.0
+	# 		}
+	# 	)
+	# )
 
 #generate a block mesh 
 func create_block_mesh(block_position: Vector3i):
@@ -161,3 +162,7 @@ func check_transparent(block_position: Vector3i) -> bool:
 	if (block_position.z < 0 || block_position.z >= dimensions.z): return true
 
 	return _blocks[Vector3i(block_position)] == blockManager.air
+
+func set_block(blockPosition: Vector3i, block: Block):
+	_blocks[Vector3i(blockPosition.x, blockPosition.y, blockPosition.z)] = block
+	update()
