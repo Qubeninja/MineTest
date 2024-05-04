@@ -12,7 +12,7 @@ albedo_color = Color(1, 1, 1, 0.196078)
 
 [sub_resource type="BoxMesh" id="BoxMesh_tiqwt"]
 material = SubResource("StandardMaterial3D_x04l7")
-size = Vector3(1.05, 1.05, 1.05)
+size = Vector3(1.025, 1.025, 1.025)
 
 [node name="Player" type="CharacterBody3D" node_paths=PackedStringArray("head", "camera", "rayCast", "blockHighlight")]
 script = ExtResource("1_lwkql")

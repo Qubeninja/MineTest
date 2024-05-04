@@ -8,6 +8,7 @@ extends StaticBody3D
 @export var noise: FastNoiseLite
 
 @onready var blockManager = $"../BlockManager"
+@onready var chunkManager = $"../ChunkManager"
 
 
 #How big is the chunk x, y, z
@@ -42,11 +43,18 @@ var _blocks: Dictionary
 
 var chunkPosition: Vector2i
 
-func _ready():
-	chunkPosition = Vector2i(int(global_position.x / dimensions.x), int(global_position.z / dimensions.z))
+func set_chunk_position(position: Vector2i):
+	chunkManager.update_chunk_position(self, position, chunkPosition)
+	chunkPosition = position
+	global_position = Vector3(chunkPosition.x * dimensions.x, 0, chunkPosition.y * dimensions.z)
 
 	generate()
 	update()
+
+func _ready():
+	set_chunk_position(Vector2i(int(global_position.x / dimensions.x), int(global_position.z / dimensions.z)))
+
+	
 
 #Fill _blocks dict
 func generate():
@@ -76,6 +84,7 @@ func generate():
 #using _blocks generate CollisionShape & MeshInstance
 func update():
 	_surfacetool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	_surfacetool.set_smooth_group(-1)
 
 	for x in dimensions.x:
 		
@@ -84,6 +93,7 @@ func update():
 			for z in dimensions.z:
 				create_block_mesh(Vector3i(x,y,z))
 	
+	_surfacetool.generate_normals()
 	_surfacetool.set_material(blockManager.chunkMaterial)
 	var mesh: ArrayMesh = _surfacetool.commit()
 

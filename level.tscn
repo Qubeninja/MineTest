@@ -1,7 +1,8 @@
-[gd_scene load_steps=17 format=3 uid="uid://dmcpwlf3wwjq0"]
+[gd_scene load_steps=18 format=3 uid="uid://dmcpwlf3wwjq0"]
 
 [ext_resource type="Script" path="res://Level.gd" id="1_uy4eo"]
 [ext_resource type="Script" path="res://BlockManager.gd" id="2_fv2nj"]
+[ext_resource type="Script" path="res://ChunkManager.gd" id="2_hxkll"]
 [ext_resource type="Script" path="res://Block.gd" id="3_oy28v"]
 [ext_resource type="Texture2D" uid="uid://dsmdcguw4q1ma" path="res://Textures/stone.png" id="4_ocu40"]
 [ext_resource type="Texture2D" uid="uid://dybcn7pkq3kfy" path="res://Textures/dirt.png" id="5_igi0o"]
@@ -42,13 +43,8 @@ script = ExtResource("1_uy4eo")
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_1nvfs")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.276358, 0.961055, 0, -0.961055, 0.276358, 0, 0, 0)
-shadow_enabled = true
-sky_mode = 1
-
-[node name="Player" parent="." instance=ExtResource("9_818cq")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.40448, 42.6759, 7.69053)
+[node name="ChunkManager" type="Node" parent="."]
+script = ExtResource("2_hxkll")
 
 [node name="BlockManager" type="Node" parent="."]
 script = ExtResource("2_fv2nj")
@@ -57,31 +53,39 @@ stone = SubResource("Resource_x4sby")
 dirt = SubResource("Resource_5oi1d")
 grass = SubResource("Resource_frk0b")
 
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.276358, 0.961055, 0, -0.961055, 0.276358, 0, 0, 0)
+shadow_enabled = true
+sky_mode = 1
+
+[node name="Player" parent="." instance=ExtResource("9_818cq")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.40448, 42.6759, 7.69053)
+
 [node name="Chunk" parent="." instance=ExtResource("8_n5ih1")]
 
 [node name="Chunk2" parent="." instance=ExtResource("8_n5ih1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0, 0)
 
 [node name="Chunk3" parent="." instance=ExtResource("8_n5ih1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 0)
 
 [node name="Chunk4" parent="." instance=ExtResource("8_n5ih1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 0)
 
 [node name="Chunk5" parent="." instance=ExtResource("8_n5ih1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -17)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -16)
 
 [node name="Chunk6" parent="." instance=ExtResource("8_n5ih1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 0, -17)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, -16)
 
 [node name="Chunk7" parent="." instance=ExtResource("8_n5ih1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, 0, -17)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 0, -16)
 
 [node name="Chunk8" parent="." instance=ExtResource("8_n5ih1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 34, 0, -17)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, -16)
 
 [node name="Chunk9" parent="." instance=ExtResource("8_n5ih1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, 0)
 
 [node name="Chunk10" parent="." instance=ExtResource("8_n5ih1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 0, -17)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 0, -16)

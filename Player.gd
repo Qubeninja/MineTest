@@ -6,7 +6,7 @@ extends CharacterBody3D
 @export var rayCast: RayCast3D
 @export var blockHighlight: MeshInstance3D
 
-@export var _mouseSensitivity: float = 0.2
+@export var _mouseSensitivity: float = 0.15
 @export var _movementSpeed: float = 5.0
 @export var _jumpVelocity: float = 5.0
 
@@ -17,6 +17,7 @@ var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 static var instance: Player
 
 @onready var blockManager = $"../BlockManager"
+@onready var chunkManager = $"../ChunkManager"
 
 func _ready() -> void:
 	instance = self
@@ -51,7 +52,7 @@ func _process(delta: float) -> void:
 			chunk.set_block(Vector3i(Vector3(intBlockPosition) - chunk.global_position), blockManager.air)
 
 		if Input.is_action_just_pressed("Place"):
-			chunk.set_block(Vector3i((Vector3(intBlockPosition) - chunk.global_position) + rayCast.get_collision_normal()), blockManager.stone)
+			chunkManager.set_block(Vector3i(intBlockPosition + Vector3i(rayCast.get_collision_normal())), blockManager.stone)
 		
 	else:
 		blockHighlight.visible = false
@@ -59,10 +60,10 @@ func _process(delta: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	var _velocity: Vector3 = velocity
-	if !is_on_floor():
+	if not is_on_floor():
 		_velocity.y -= _gravity * float(delta)
 
-	if Input.is_action_just_pressed("Jump"):
+	if Input.is_action_just_pressed("Jump") && is_on_floor():
 		_velocity.y = _jumpVelocity
 
 	var inputDirection: Vector2 = Input.get_vector("Left", "Right", "Back", "Forward").normalized()
