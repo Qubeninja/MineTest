@@ -45,6 +45,7 @@ environment = SubResource("Environment_1nvfs")
 
 [node name="ChunkManager" type="Node" parent="."]
 script = ExtResource("2_hxkll")
+chunkScene = ExtResource("8_n5ih1")
 
 [node name="BlockManager" type="Node" parent="."]
 script = ExtResource("2_fv2nj")

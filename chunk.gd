@@ -46,14 +46,10 @@ var chunkPosition: Vector2i
 func set_chunk_position(position: Vector2i):
 	chunkManager.update_chunk_position(self, position, chunkPosition)
 	chunkPosition = position
-	global_position = Vector3(chunkPosition.x * dimensions.x, 0, chunkPosition.y * dimensions.z)
-
+	call_deferred("set_position", Vector3(chunkPosition.x * dimensions.x, 0, chunkPosition.y * dimensions.z))
+	
 	generate()
 	update()
-
-func _ready():
-	set_chunk_position(Vector2i(int(global_position.x / dimensions.x), int(global_position.z / dimensions.z)))
-
 	
 
 #Fill _blocks dict

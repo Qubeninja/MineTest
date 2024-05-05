@@ -2,13 +2,14 @@
 
 [ext_resource type="Script" path="res://Chunk.gd" id="1_qkn3d"]
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_y4v4u"]
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_1cr5l"]
+frequency = 0.007
 
 [node name="Chunk" type="StaticBody3D" node_paths=PackedStringArray("CollisionShape", "MeshInstance")]
 script = ExtResource("1_qkn3d")
 CollisionShape = NodePath("CollisionShape3D")
 MeshInstance = NodePath("MeshInstance3D")
-noise = SubResource("FastNoiseLite_y4v4u")
+noise = SubResource("FastNoiseLite_1cr5l")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 
