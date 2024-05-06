@@ -7,9 +7,8 @@ extends StaticBody3D
 
 @export var noise: FastNoiseLite
 
-@onready var blockManager = $"../BlockManager"
-@onready var chunkManager = $"../ChunkManager"
-
+@onready var blockManager: BlockManager = $"../BlockManager"
+@onready var chunkManager: ChunkManager = $"../ChunkManager"
 
 #How big is the chunk x, y, z
 static var dimensions: Vector3i = Vector3i(16, 64, 16)
@@ -43,10 +42,14 @@ var _blocks: Dictionary
 
 var chunkPosition: Vector2i
 
+#func _ready() -> void:
+	#set_chunk_position(Vector2i(global_position.x / dimensions.x, global_position.z / dimensions.z))
+ 
+
 func set_chunk_position(position: Vector2i):
 	chunkManager.update_chunk_position(self, position, chunkPosition)
 	chunkPosition = position
-	call_deferred("set_position", Vector3(chunkPosition.x * dimensions.x, 0, chunkPosition.y * dimensions.z))
+	global_position = Vector3(chunkPosition.x * dimensions.x, 0, chunkPosition.y * dimensions.z)
 	
 	generate()
 	update()
@@ -55,17 +58,13 @@ func set_chunk_position(position: Vector2i):
 #Fill _blocks dict
 func generate():
 	for x in dimensions.x:
-		
 		for y in dimensions.y:
-			
 			for z in dimensions.z:
 				var block: Block 
-
 				var globalBlockPosition: Vector2i = (chunkPosition * Vector2i(dimensions.x, dimensions.z)) + Vector2i(x, z)
-				# gte_noise_2d outputs a value in range of (-1 - 1), +1 makes it (0 - 2), /2 makes it (0 - 1), * dim.y makes it a value between 0 and dim.y,
+				# get_noise_2d outputs a value in range of (-1 - 1), +1 makes it (0 - 2), /2 makes it (0 - 1), * dim.y makes it a value between 0 and dim.y,
 				# finally cast whole thing as an int
 				var groundHeight: int = int((dimensions.y * ((noise.get_noise_2d(globalBlockPosition.x, globalBlockPosition.y) + 1.0) / 2.0))) 
-
 				if y < groundHeight / 1.2:
 					block = blockManager.stone
 				else: if y < groundHeight:
@@ -81,18 +80,13 @@ func generate():
 func update():
 	_surfacetool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	_surfacetool.set_smooth_group(-1)
-
 	for x in dimensions.x:
-		
 		for y in dimensions.y:
-			
 			for z in dimensions.z:
 				create_block_mesh(Vector3i(x,y,z))
-	
 	_surfacetool.generate_normals()
 	_surfacetool.set_material(blockManager.chunkMaterial)
 	var mesh: ArrayMesh = _surfacetool.commit()
-
 	MeshInstance.mesh = mesh
 	CollisionShape.shape = mesh.create_trimesh_shape()
 
