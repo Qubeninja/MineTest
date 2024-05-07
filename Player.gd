@@ -37,7 +37,7 @@ func _input(event: InputEvent) -> void:
 			_cameraXRotation += deltaX
 
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 
 	if rayCast.is_colliding() && rayCast.get_collider() is Chunk:
 		blockHighlight.visible = true
