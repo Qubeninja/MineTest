@@ -1,14 +1,14 @@
 [gd_scene load_steps=18 format=3 uid="uid://dmcpwlf3wwjq0"]
 
 [ext_resource type="Script" path="res://Level.gd" id="1_uy4eo"]
-[ext_resource type="Script" path="res://BlockManager.gd" id="2_fv2nj"]
-[ext_resource type="Script" path="res://ChunkManager.gd" id="2_hxkll"]
-[ext_resource type="Script" path="res://Block.gd" id="3_oy28v"]
+[ext_resource type="Script" path="res://Terrain/BlockManager.gd" id="2_fv2nj"]
+[ext_resource type="Script" path="res://Terrain/ChunkManager.gd" id="2_hxkll"]
+[ext_resource type="Script" path="res://Terrain/Block.gd" id="3_oy28v"]
 [ext_resource type="Texture2D" uid="uid://dsmdcguw4q1ma" path="res://Textures/stone.png" id="4_ocu40"]
 [ext_resource type="Texture2D" uid="uid://dybcn7pkq3kfy" path="res://Textures/dirt.png" id="5_igi0o"]
 [ext_resource type="Texture2D" uid="uid://morj53gwbe0u" path="res://Textures/grassSide.png" id="6_pqahc"]
 [ext_resource type="Texture2D" uid="uid://cefsg7hfeipo1" path="res://Textures/grass.png" id="7_pb6c0"]
-[ext_resource type="PackedScene" uid="uid://cdq1hwdk00tee" path="res://Chunk.tscn" id="8_n5ih1"]
+[ext_resource type="PackedScene" uid="uid://cdq1hwdk00tee" path="res://Terrain/Chunk.tscn" id="8_n5ih1"]
 [ext_resource type="PackedScene" uid="uid://bpe74q4chdalh" path="res://Player.tscn" id="9_818cq"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_37atg"]

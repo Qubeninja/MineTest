@@ -1,9 +1,9 @@
 [gd_scene load_steps=3 format=3 uid="uid://cdq1hwdk00tee"]
 
-[ext_resource type="Script" path="res://Chunk.gd" id="1_qkn3d"]
+[ext_resource type="Script" path="res://Terrain/Chunk.gd" id="1_qkn3d"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_1cr5l"]
-frequency = 0.007
+frequency = 0.002
 
 [node name="Chunk" type="StaticBody3D" node_paths=PackedStringArray("CollisionShape", "MeshInstance")]
 script = ExtResource("1_qkn3d")
