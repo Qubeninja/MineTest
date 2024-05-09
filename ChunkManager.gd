@@ -15,35 +15,42 @@ var _chunks: Array
 var _width: int = 5
 var _halfwidth = floori(_width / 2.0)
 
-var thread: Thread
+var thread: Thread = Thread.new()
 var _playerPosition: Vector3
 var mutex: Mutex
 
 
 func _ready():
-	thread = Thread.new()
 	mutex = Mutex.new()
 	
-	_chunks = get_parent().get_children().filter(func(i): return i is Chunk)
+	_chunks = self.get_children().filter(func(i): return i is Chunk)
 	var count = _chunks.size()
 	while count < _width * _width:
 		var chunk = chunkScene.instantiate()
-		get_parent().call_deferred("add_child", chunk)
+		#get_parent().call_deferred("add_child", chunk)
+		add_child(chunk)
 		_chunks.append(chunk)
 		count = _chunks.size()
 	#call_deferred("generate_chunk_index")
+	print("instantiated ", count, " chunks")
 	generate_chunk_index()
+	print("called generate_chunk_index")
 
 	if not Engine.is_editor_hint():
-		thread.start(thread_process())
+		thread.start(thread_process)
 
 		
 func generate_chunk_index():
+	var previous_index
 	for x in _width:
 		for y in _width:
 			var index: int = (x * _width) + y
+			if index == previous_index:
+				continue
 			_chunks[index].set_chunk_position(Vector2i(x - _halfwidth, y - _halfwidth))
 			#_chunks[index].call_deferred("set_chunk_position", Vector2i(x - _halfwidth, y - _halfwidth))
+			previous_index = index
+	print("called set_chunk_position ", previous_index + 1, " times")
 
 
 
@@ -51,7 +58,6 @@ func update_chunk_position(chunk: Chunk, currentPosition: Vector2i, previousPosi
 	if _positionToChunk.has(previousPosition):
 		if _positionToChunk[previousPosition] == chunk:
 			_positionToChunk.erase(previousPosition)
-
 	_chunkToPosition[chunk] = currentPosition
 	_positionToChunk[currentPosition] = chunk
 
@@ -81,8 +87,10 @@ func thread_process():
 		mutex.unlock()
 
 		for chunk in _chunks:
+			mutex.lock()
 			var chunkPosition = _chunkToPosition[chunk]
-
+			mutex.unlock()
+			
 			var chunkX = chunkPosition.x
 			var chunkZ = chunkPosition.y
 
@@ -98,8 +106,11 @@ func thread_process():
 
 				_chunkToPosition[chunk] = newPosition
 				_positionToChunk[newPosition] = chunk
-
-				call_deferred("set_chunk_position", newPosition)
+				
+				#chunk.set_chunk_position(newPosition)
+				chunk.call_deferred("set_chunk_position", newPosition)
 				mutex.unlock()
 			
+func _exit_tree() -> void:
+	thread.wait_to_finish()
 

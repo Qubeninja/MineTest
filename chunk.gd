@@ -7,8 +7,8 @@ extends StaticBody3D
 
 @export var noise: FastNoiseLite
 
-@onready var blockManager: BlockManager = $"../BlockManager"
-@onready var chunkManager: ChunkManager = $"../ChunkManager"
+@onready var blockManager: BlockManager = $"../../BlockManager"
+@onready var chunkManager: ChunkManager = $".."
 
 #How big is the chunk x, y, z
 static var dimensions: Vector3i = Vector3i(16, 64, 16)
@@ -38,9 +38,15 @@ static var _front: Array[int] = [2,0,1,3]
 var _surfacetool: SurfaceTool = SurfaceTool.new()
 
 #WARN: possible problem point
-var _blocks: Dictionary
+var _blocks: Dictionary = {}
 
 var chunkPosition: Vector2i
+
+var generate_thread: Thread = Thread.new()
+var mutex: Mutex = Mutex.new()
+var update_thread: Thread = Thread.new()
+var update_mutex: Mutex = Mutex.new()
+
 
 #func _ready() -> void:
 	#set_chunk_position(Vector2i(global_position.x / dimensions.x, global_position.z / dimensions.z))
@@ -51,6 +57,8 @@ func set_chunk_position(position: Vector2i):
 	chunkPosition = position
 	global_position = Vector3(chunkPosition.x * dimensions.x, 0, chunkPosition.y * dimensions.z)
 	
+	#generate_thread.start(generate)
+	#update_thread.start(update)
 	generate()
 	update()
 	
@@ -67,14 +75,18 @@ func generate():
 				var groundHeight: int = int((dimensions.y * ((noise.get_noise_2d(globalBlockPosition.x, globalBlockPosition.y) + 1.0) / 2.0))) 
 				if y < groundHeight / 1.2:
 					block = blockManager.stone
-				else: if y < groundHeight:
+				elif y < groundHeight:
 					block = blockManager.dirt
-				else: if y == groundHeight:
+				elif y == groundHeight:
 					block = blockManager.grass
 				else:
-					block = blockManager.air	
+					block = blockManager.air
 				
+				mutex.lock()
 				_blocks[Vector3i(x,y,z)] = block
+				mutex.unlock()
+	print("Chunk.generate created ", _blocks.size(), " blocks")
+	#generate_thread.wait_to_finish()
 
 #using _blocks generate CollisionShape & MeshInstance
 func update():
@@ -89,24 +101,27 @@ func update():
 	var mesh: ArrayMesh = _surfacetool.commit()
 	MeshInstance.mesh = mesh
 	CollisionShape.shape = mesh.create_trimesh_shape()
-
-	# print(
-	# 	"generated {vertices} vertices ({triangles} triangles, {faces} faces)".format(
-	# 		{
-	# 			"vertices": mesh.surface_get_array_len(0),
-	# 			"triangles": mesh.surface_get_array_len(0) / 3.0,
-	# 			"faces": (mesh.surface_get_array_len(0) / 3.0) / 2.0
-	# 		}
-	# 	)
-	# )
+	#update_thread.wait_to_finish()
+	print(
+		"generated {vertices} vertices ({triangles} triangles, {faces} faces)".format(
+			{
+				"vertices": mesh.surface_get_array_len(0),
+				"triangles": mesh.surface_get_array_len(0) / 3.0,
+				"faces": (mesh.surface_get_array_len(0) / 3.0) / 2.0
+			}
+		)
+	)
 
 #generate a block mesh 
 func create_block_mesh(block_position: Vector3i):
+	mutex.lock()
 	var block = _blocks[Vector3i(block_position)]
+	mutex.unlock()
 
 	if block == blockManager.air: return
 	#Check if block above is transparent
 	if check_transparent(block_position + Vector3i.UP):
+		
 		#if true create top face mesh
 		create_face_mesh(_top, block_position, block.topTexture if block.topTexture else block.texture)
 
@@ -124,6 +139,7 @@ func create_block_mesh(block_position: Vector3i):
 
 	if check_transparent(block_position + Vector3i.FORWARD):
 		create_face_mesh(_front, block_position, block.texture)
+	
 
 #generate a face mesh using face array
 func create_face_mesh(face: Array[int], block_position: Vector3i, texture: Texture2D):
@@ -160,9 +176,12 @@ func check_transparent(block_position: Vector3i) -> bool:
 	if (block_position.x < 0 || block_position.x >= dimensions.x): return true
 	if (block_position.y < 0 || block_position.y >= dimensions.y): return true
 	if (block_position.z < 0 || block_position.z >= dimensions.z): return true
-
+	
 	return _blocks[Vector3i(block_position)] == blockManager.air
+	
 
 func set_block(blockPosition: Vector3i, block: Block):
+	mutex.lock()
 	_blocks[Vector3i(blockPosition.x, blockPosition.y, blockPosition.z)] = block
+	mutex.unlock()
 	update()
